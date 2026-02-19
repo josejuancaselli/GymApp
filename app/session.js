@@ -10,6 +10,7 @@ import {
     TextInput,
     View,
 } from "react-native";
+import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatlist";
 import { Swipeable } from "react-native-gesture-handler";
 import { useWorkout } from "../context/WorkoutContext";
 
@@ -19,7 +20,7 @@ export default function Session() {
 
     const [editingExercise, setEditingExercise] = useState(null);
     const [doneExercises, setDoneExercises] = useState({});
-    const exercises = sessions[type] || [];
+    const [exercisesState, setExercisesState] = useState(sessions[type] || []);
 
     // Modal de agregar/editar
     const [modalVisible, setModalVisible] = useState(false);
@@ -40,7 +41,6 @@ export default function Session() {
         }));
     };
 
-    // Guardar nuevo ejercicio
     const handleSave = async () => {
         if (!name || !weight || !reps) return;
 
@@ -62,6 +62,7 @@ export default function Session() {
         };
 
         await addExercise(type, newExercise);
+        setExercisesState((prev) => [...prev, newExercise]);
 
         setModalVisible(false);
         setName("");
@@ -71,7 +72,6 @@ export default function Session() {
         setComments("");
     };
 
-    // Editar ejercicio
     const startEditing = (exercise) => {
         setEditingExercise(exercise);
         setName(exercise.name);
@@ -103,6 +103,9 @@ export default function Session() {
         };
 
         await editExercise(type, updatedExercise);
+        setExercisesState((prev) =>
+            prev.map((ex) => (ex.id === updatedExercise.id ? updatedExercise : ex))
+        );
 
         setEditingExercise(null);
         setModalVisible(false);
@@ -125,68 +128,80 @@ export default function Session() {
 
     const handleRemove = async (id) => {
         await removeExercise(type, id);
+        setExercisesState((prev) => prev.filter((ex) => ex.id !== id));
     };
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Sesion {type}</Text>
 
-            <ScrollView style={{ width: "100%", marginTop: 20 }}>
-                {exercises.map((ex) => (
-                    < View key={ex.id} style={styles.exerciseWrapper} >
-                        <Swipeable
-                            renderRightActions={() => (
-                                <Pressable
-                                    onPress={() => handleRemove(ex.id)}
-                                    style={{
-                                        backgroundColor: "red",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        width: 80,
-                                        margin: 0,
-                                        borderRadius: 12,
-                                    }}
-                                >
-                                    <MaterialIcons name="delete" size={28} color="white" />
-                                </Pressable>
-                            )}
-                        >
-
-                            <Pressable
-                                onPress={() => toggleDone(ex.id)}
-                                onLongPress={() => startEditing(ex)}
-                                style={[
-                                    styles.exerciseCard,
-                                    doneExercises[ex.id] && { backgroundColor: "#747474" },
-                                ]}
+            <DraggableFlatList
+            style={{marginBottom:110}}
+                data={exercisesState}
+                keyExtractor={(item) => item.id}
+                onDragEnd={({ data }) => setExercisesState(data)}
+                renderItem={({ item, drag, isActive }) => (
+                    <ScaleDecorator>
+                        <View style={styles.exerciseWrapper}>
+                            <Swipeable
+                                renderRightActions={() => (
+                                    <Pressable
+                                        onPress={() => handleRemove(item.id)}
+                                        style={{
+                                            backgroundColor: "red",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            width: 80,
+                                            margin: 0,
+                                            borderRadius: 12,
+                                        }}
+                                    >
+                                        <MaterialIcons name="delete" size={28} color="white" />
+                                    </Pressable>
+                                )}
                             >
-                                <View>
-                                    <Text style={styles.exerciseName}>{ex.name}</Text>
-                                    <Text style={styles.exerciseDetail}>Peso: {ex.currentWeight} kg</Text>
-                                    <Text style={styles.exerciseDetail}>Series: {ex.currentSeries}</Text>
-                                    <Text style={styles.exerciseDetail}>Reps: {ex.currentReps}</Text>                                    
-                                    {ex.comments && (
-                                        <Text style={styles.exerciseComments}>Notas: {ex.comments}</Text>
-                                    )}
-                                    {doneExercises[ex.id] && <Text style={styles.tick}>✔</Text>}
-                                </View>
-                                {/* Botón History */}
                                 <Pressable
-                                    onPress={() => setHistoryModalExercise(ex)}
-                                    style={styles.historyButton}
+                                    onPress={() => toggleDone(item.id)}
+                                    onLongPress={() => startEditing(item)}
+                                    style={[
+                                        styles.exerciseCard,
+                                        doneExercises[item.id] && { backgroundColor: "#747474" },
+                                    ]}
                                 >
-                                    <Text style={{ color: "white" }}>History</Text>
+                                    <Pressable
+                                        onLongPress={drag}
+                                        delayLongPress={0}
+                                        style={{
+                                            marginRight: 10,
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        <MaterialIcons name="drag-handle" size={24} color="#999" />
+                                    </Pressable>
+
+                                    <View style={{ width: "70%" }}>
+                                        <Text style={styles.exerciseName}>{item.name}</Text>
+                                        <Text style={styles.exerciseDetail}>Peso: {item.currentWeight} kg</Text>
+                                        <Text style={styles.exerciseDetail}>Series: {item.currentSeries}</Text>
+                                        <Text style={styles.exerciseDetail}>Reps: {item.currentReps}</Text>
+                                        {item.comments && (
+                                            <Text style={styles.exerciseComments}>Notas: {item.comments}</Text>
+                                        )}
+                                    </View>
+
+                                    <Pressable
+                                        onPress={() => setHistoryModalExercise(item)}
+                                        style={styles.historyButton}
+                                    >
+                                        <Text style={{ color: "white" }}>History</Text>
+                                    </Pressable>
                                 </Pressable>
-
-                            </Pressable>
-
-                        </Swipeable>
-
-
-                    </View>
-                ))}
-
-            </ScrollView>
+                            </Swipeable>
+                        </View>
+                    </ScaleDecorator>
+                )}
+            />
 
             {/* Botón agregar ejercicio */}
             <Pressable style={styles.addButton} onPress={() => setModalVisible(true)}>
@@ -298,24 +313,25 @@ export default function Session() {
     );
 }
 
+
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#111", padding: 20 },
-    title: { color: "white", fontSize: 24, margin:"auto" },
+    title: { color: "white", fontSize: 24, marginLeft: "auto", marginRight: "auto", marginBottom: 20 },
     exerciseWrapper: { marginBottom: 12 },
     exerciseCard: {
         backgroundColor: "#222",
         padding: 16,
         borderRadius: 12,
-        width: "95%",
+        width: "100%",
         alignSelf: "center",
         display: "flex",
         flexDirection: "row",
-        justifyContent: "space-between",
+
     },
     exerciseName: { color: "white", fontSize: 18, fontWeight: "bold", marginBottom: 6 },
     exerciseDetail: { color: "#ccc", fontSize: 16 },
     exerciseComments: { color: "#aaa", fontStyle: "italic", marginTop: 4 },
-    tick: { color: "white", fontSize: 18, position: "absolute", right: 16, top: 16, fontWeight: "bold" },
+    tick: { color: "white", fontSize: 18, fontWeight: "bold" },
     historyButton: {
         backgroundColor: "#555",
         alignSelf: "flex-end",
