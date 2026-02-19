@@ -11,7 +11,7 @@ export function WorkoutProvider({ children }) {
         C: [],
     });
 
-    // 🔹 Cargar ejercicios desde Firestore al iniciar
+    // 🔹 Cargar ejercicios desde Firestore al iniciar y ordenarlos
     useEffect(() => {
         const fetchSessions = async () => {
             const sessionTypes = ["A", "B", "C"];
@@ -22,7 +22,11 @@ export function WorkoutProvider({ children }) {
                     const exercisesSnap = await getDocs(
                         collection(db, "sessions", type, "exercises")
                     );
-                    newSessions[type] = exercisesSnap.docs.map((doc) => doc.data());
+
+                    // map + ordenar por campo 'order'
+                    newSessions[type] = exercisesSnap.docs
+                        .map((doc) => doc.data())
+                        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
                 } catch (err) {
                     console.log(`Error al traer ejercicios ${type}:`, err);
                 }
@@ -53,7 +57,7 @@ export function WorkoutProvider({ children }) {
         }
     };
 
-    // 🔹 Editar ejercicio
+    // 🔹 Editar ejercicio (incluye persistir 'order')
     const editExercise = async (sessionType, updatedExercise) => {
         setSessions((prev) => ({
             ...prev,

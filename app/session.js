@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Modal,
     Pressable,
@@ -20,7 +20,7 @@ export default function Session() {
 
     const [editingExercise, setEditingExercise] = useState(null);
     const [doneExercises, setDoneExercises] = useState({});
-    const [exercisesState, setExercisesState] = useState(sessions[type] || []);
+    const [exercisesState, setExercisesState] = useState([]);
 
     // Modal de agregar/editar
     const [modalVisible, setModalVisible] = useState(false);
@@ -32,6 +32,13 @@ export default function Session() {
 
     // Modal de historial
     const [historyModalExercise, setHistoryModalExercise] = useState(null);
+
+    // Sincronizar ejerciciosState con el context y ordenar por "order"
+    useEffect(() => {
+        const sessionExercises = sessions[type] || [];
+        const sorted = [...sessionExercises].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        setExercisesState(sorted);
+    }, [sessions, type]);
 
     // Toggle check
     const toggleDone = (id) => {
@@ -59,17 +66,13 @@ export default function Session() {
                     reps: Number(reps),
                 },
             ],
+            order: exercisesState.length, // <- orden inicial
         };
 
         await addExercise(type, newExercise);
         setExercisesState((prev) => [...prev, newExercise]);
 
-        setModalVisible(false);
-        setName("");
-        setWeight("");
-        setSeries("");
-        setReps("");
-        setComments("");
+        resetModal();
     };
 
     const startEditing = (exercise) => {
@@ -107,13 +110,7 @@ export default function Session() {
             prev.map((ex) => (ex.id === updatedExercise.id ? updatedExercise : ex))
         );
 
-        setEditingExercise(null);
-        setModalVisible(false);
-        setName("");
-        setWeight("");
-        setSeries("");
-        setReps("");
-        setComments("");
+        resetModal();
     };
 
     const resetModal = () => {
@@ -136,11 +133,22 @@ export default function Session() {
             <Text style={styles.title}>Sesion {type}</Text>
 
             <DraggableFlatList
-            style={{marginBottom:110}}
+                style={{ marginBottom: 110 }}
                 data={exercisesState}
                 keyExtractor={(item) => item.id}
-                onDragEnd={({ data }) => setExercisesState(data)}
-                renderItem={({ item, drag, isActive }) => (
+                onDragEnd={async ({ data }) => {
+                    setExercisesState(data);
+
+                    // Persistir orden en Firestore
+                    for (let index = 0; index < data.length; index++) {
+                        const ex = data[index];
+                        if (ex.order !== index) {
+                            const updatedExercise = { ...ex, order: index };
+                            await editExercise(type, updatedExercise);
+                        }
+                    }
+                }}
+                renderItem={({ item, drag }) => (
                     <ScaleDecorator>
                         <View style={styles.exerciseWrapper}>
                             <Swipeable
@@ -313,7 +321,7 @@ export default function Session() {
     );
 }
 
-
+// Styles quedan igual que los que tenías antes
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#111", padding: 20 },
     title: { color: "white", fontSize: 24, marginLeft: "auto", marginRight: "auto", marginBottom: 20 },
@@ -326,7 +334,6 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         display: "flex",
         flexDirection: "row",
-
     },
     exerciseName: { color: "white", fontSize: 18, fontWeight: "bold", marginBottom: 6 },
     exerciseDetail: { color: "#ccc", fontSize: 16 },
