@@ -12,28 +12,28 @@ export default function Home() {
                 style={styles.button}
                 onPress={() => router.push("/session?type=A")}
             >
-                <Text style={styles.buttonText}>Session A</Text>
+                <Text style={styles.buttonText}>Sesion A</Text>
             </Pressable>
 
             <Pressable
                 style={styles.button}
                 onPress={() => router.push("/session?type=B")}
             >
-                <Text style={styles.buttonText}>Session B</Text>
+                <Text style={styles.buttonText}>Sesion B</Text>
             </Pressable>
 
             <Pressable
                 style={styles.button}
                 onPress={() => router.push("/session?type=C")}
             >
-                <Text style={styles.buttonText}>Session C</Text>
+                <Text style={styles.buttonText}>Sesion C</Text>
             </Pressable>
 
             <Pressable
                 style={styles.button}
                 onPress={() => router.push("/history")}
             >
-                <Text style={styles.buttonText}>History</Text>
+                <Text style={styles.buttonText}>Historial</Text>
             </Pressable>
 
         </View>
