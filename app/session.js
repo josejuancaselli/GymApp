@@ -49,31 +49,30 @@ export default function Session() {
     };
 
     const handleSave = async () => {
-        if (!name || !weight || !reps) return;
+    if (!name || !weight || !reps) return;
 
-        const newExercise = {
-            id: Date.now().toString(),
-            name,
-            currentWeight: Number(weight),
-            currentSeries: Number(series),
-            currentReps: Number(reps),
-            comments,
-            history: [
-                {
-                    date: new Date().toISOString(),
-                    weight: Number(weight),
-                    series: Number(series),
-                    reps: Number(reps),
-                },
-            ],
-            order: exercisesState.length, // <- orden inicial
-        };
-
-        await addExercise(type, newExercise);
-        setExercisesState((prev) => [...prev, newExercise]);
-
-        resetModal();
+    const newExercise = {
+        id: Date.now().toString(),
+        name,
+        currentWeight: Number(weight),
+        currentSeries: Number(series),
+        currentReps: Number(reps),
+        comments,
+        history: [
+            {
+                date: new Date().toISOString(),
+                weight: Number(weight),
+                series: Number(series),
+                reps: Number(reps),
+            },
+        ],
+        order: exercisesState.length,
     };
+
+    await addExercise(type, newExercise);
+
+    resetModal();
+};
 
     const startEditing = (exercise) => {
         setEditingExercise(exercise);
