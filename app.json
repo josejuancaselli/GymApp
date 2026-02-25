@@ -4,7 +4,7 @@
     "slug": "gym-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/formacion.png",
     "scheme": "gymapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
