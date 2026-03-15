@@ -1,67 +1,126 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useWorkout } from "../context/WorkoutContext";
 
 export default function Home() {
+
     const router = useRouter();
+    const { archiveProgram } = useWorkout();
+
+    const Card = ({ title, icon, route }) => (
+        <Pressable
+            style={styles.card}
+            onPress={() => router.push(route)}
+        >
+            <MaterialIcons name={icon} size={36} color="white" />
+            <Text style={styles.cardText}>{title}</Text>
+        </Pressable>
+    );
 
     return (
+
         <View style={styles.container}>
+
             <Text style={styles.title}>Gym App</Text>
 
-            <Pressable
-                style={styles.button}
-                onPress={() => router.push("/session?type=A")}
-            >
-                <Text style={styles.buttonText}>Sesion A</Text>
-            </Pressable>
+            <View style={styles.grid}>
+
+                <Card
+                    title="Sesión A"
+                    icon="fitness-center"
+                    route="/session?type=A"
+                />
+
+                <Card
+                    title="Sesión B"
+                    icon="fitness-center"
+                    route="/session?type=B"
+                />
+
+                <Card
+                    title="Sesión C"
+                    icon="fitness-center"
+                    route="/session?type=C"
+                />
+
+               
+
+                <Card
+                    title="Historial"
+                    icon="history"
+                    route="/history"
+                />
+
+            </View>
 
             <Pressable
-                style={styles.button}
-                onPress={() => router.push("/session?type=B")}
+                style={styles.archiveButton}
+                onPress={archiveProgram}
             >
-                <Text style={styles.buttonText}>Sesion B</Text>
-            </Pressable>
-
-            <Pressable
-                style={styles.button}
-                onPress={() => router.push("/session?type=C")}
-            >
-                <Text style={styles.buttonText}>Sesion C</Text>
-            </Pressable>
-
-            <Pressable
-                style={styles.button}
-                onPress={() => router.push("/history")}
-            >
-                <Text style={styles.buttonText}>Historial</Text>
+                <MaterialIcons name="archive" size={20} color="white" />
+                <Text style={styles.archiveText}>
+                    Guardar programa
+                </Text>
             </Pressable>
 
         </View>
+
     );
+
 }
 
 const styles = StyleSheet.create({
+
     container: {
         flex: 1,
         backgroundColor: "#111",
-        alignItems: "center",
-        justifyContent: "center",
+        paddingTop: 80,
+        alignItems: "center"
     },
+
     title: {
         color: "white",
-        fontSize: 28,
-        marginBottom: 30,
+        fontSize: 30,
+        marginBottom: 40
     },
-    button: {
-        backgroundColor: "#333",
-        padding: 15,
-        marginVertical: 10,
-        width: 200,
+
+    grid: {
+        width: "90%",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between"
+    },
+
+    card: {
+        width: "47%",
+        backgroundColor: "#222",
+        padding: 30,
+        borderRadius: 14,
         alignItems: "center",
-        borderRadius: 8,
+        marginBottom: 16
     },
-    buttonText: {
+
+    cardText: {
         color: "white",
-        fontSize: 16,
+        marginTop: 10,
+        fontSize: 16
     },
+
+    archiveButton: {
+        marginTop: 30,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        backgroundColor: "#333",
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 10
+    },
+
+    archiveText: {
+        color: "white",
+        fontSize: 15
+    }
+
 });

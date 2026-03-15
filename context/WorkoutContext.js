@@ -97,9 +97,50 @@ export function WorkoutProvider({ children }) {
         }
     };
 
+const archiveProgram = async () => {
+
+    const programSnapshot = {
+        date: new Date().toISOString(),
+        sessions: sessions
+    };
+
+    try {
+
+        // guardar snapshot del programa completo
+        const historyRef = doc(collection(db, "programHistory"));
+        await setDoc(historyRef, programSnapshot);
+
+        // borrar ejercicios actuales
+        for (let type of ["A", "B", "C"]) {
+
+            for (let ex of sessions[type]) {
+
+                const exerciseRef = doc(
+                    collection(db, "sessions", type, "exercises"),
+                    ex.id
+                );
+
+                await deleteDoc(exerciseRef);
+            }
+        }
+
+        // limpiar estado local
+        setSessions({
+            A: [],
+            B: [],
+            C: [],
+        });
+
+        console.log("Programa archivado con progreso");
+
+    } catch (err) {
+        console.log("Error archivando programa:", err);
+    }
+};
+
     return (
         <WorkoutContext.Provider
-            value={{ sessions, addExercise, editExercise, removeExercise }}
+            value={{ sessions, addExercise, editExercise, removeExercise,archiveProgram }}
         >
             {children}
         </WorkoutContext.Provider>
