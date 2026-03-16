@@ -65,9 +65,10 @@ export default function History() {
                 {programs.map(program => {
 
                     const totalExercises =
-                        program.sessions.A.length +
-                        program.sessions.B.length +
-                        program.sessions.C.length;
+                        (program.sessions.A?.length || 0) +
+                        (program.sessions.B?.length || 0) +
+                        (program.sessions.C?.length || 0) +
+                        (program.sessions.D?.length || 0);
 
                     return (
 

@@ -54,16 +54,16 @@ export default function Session() {
     const newExercise = {
         id: Date.now().toString(),
         name,
-        currentWeight: Number(weight),
-        currentSeries: Number(series),
-        currentReps: Number(reps),
+        currentWeight: (weight),
+        currentSeries: (series),
+        currentReps: (reps),
         comments,
         history: [
             {
                 date: new Date().toISOString(),
-                weight: Number(weight),
-                series: Number(series),
-                reps: Number(reps),
+                weight: (weight),
+                series: (series),
+                reps: (reps),
             },
         ],
         order: exercisesState.length,
@@ -89,17 +89,17 @@ export default function Session() {
 
         const updatedExercise = {
             ...editingExercise,
-            currentWeight: Number(weight),
-            currentSeries: Number(series),
-            currentReps: Number(reps),
+            currentWeight: (weight),
+            currentSeries: (series),
+            currentReps: (reps),
             comments,
             history: [
                 ...editingExercise.history,
                 {
                     date: new Date().toISOString(),
-                    weight: Number(weight),
-                    series: Number(series),
-                    reps: Number(reps),
+                    weight: (weight),
+                    series: (series),
+                    reps: (reps),
                 },
             ],
         };

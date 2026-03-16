@@ -44,7 +44,11 @@ export default function Home() {
                     route="/session?type=C"
                 />
 
-               
+                <Card
+                    title="Sesión D"
+                    icon="fitness-center"
+                    route="/session?type=D"
+                />
 
                 <Card
                     title="Historial"

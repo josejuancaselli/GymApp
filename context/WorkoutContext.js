@@ -9,13 +9,14 @@ export function WorkoutProvider({ children }) {
         A: [],
         B: [],
         C: [],
+        D: [],
     });
 
     // 🔹 Cargar ejercicios desde Firestore al iniciar y ordenarlos
     useEffect(() => {
         const fetchSessions = async () => {
-            const sessionTypes = ["A", "B", "C"];
-            const newSessions = { A: [], B: [], C: [] };
+            const sessionTypes = ["A", "B", "C", "D"];
+            const newSessions = { A: [], B: [], C: [], D:[]};
 
             for (let type of sessionTypes) {
                 try {
@@ -111,7 +112,7 @@ const archiveProgram = async () => {
         await setDoc(historyRef, programSnapshot);
 
         // borrar ejercicios actuales
-        for (let type of ["A", "B", "C"]) {
+        for (let type of ["A", "B", "C", "D"]) {
 
             for (let ex of sessions[type]) {
 
